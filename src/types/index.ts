@@ -25,24 +25,28 @@ export interface EventConfig {
   useCustomBanner: boolean;
   showLanyardSlot: boolean;
   showCutMarks: boolean;
+  photoScale: number; // percentage, e.g. 88 (makes photo smaller so it never overlaps text)
+  photoOffsetY: number; // vertical adjustment in percentage
 }
 
 export const DEFAULT_EVENT_CONFIG: EventConfig = {
   headerArcTitle: "এসএসসি ৮৮ ব্যাচের বন্ধুদের মিলনমেলা",
   mainTitle: "বাহের ডাক",
-  slogan1: "স্মৃতির আলোঃ......বন্ধুত্বের উচ্ছ্বাসে......",
+  slogan1: "স্মৃতির আলো......বন্ধুত্বের উচ্ছ্বাসে.....",
   slogan2: "আমরা আবার এক সাথে",
   labelReg: "নিবন্ধন নং",
-  labelName: "নামঃ",
-  labelSchool: "স্কুলঃ",
-  labelDistrict: "জেলা অবস্থানঃ",
-  labelGuests: "অতিথিঃ",
-  labelPhone: "মোবাইল নম্বরঃ",
+  labelName: "",
+  labelSchool: "",
+  labelDistrict: "",
+  labelGuests: "অতিথিঃ ",
+  labelPhone: "",
   date: "১৮ ডিসেম্বর, ২০২৬",
   venue: "আনান সিটি পার্ক, রংপুর",
   useCustomBanner: false,
   showLanyardSlot: true,
   showCutMarks: true,
+  photoScale: 98,
+  photoOffsetY: 0,
 };
 
 export const INITIAL_ATTENDEES: Attendee[] = [

@@ -40,17 +40,17 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
   return (
     <div
       id={cardId}
-      className={`relative w-full aspect-[545/812] overflow-hidden select-none font-bangla ${
+      className={`relative w-full aspect-[1038/1515] overflow-hidden select-none font-bangla ${
         isPrintMode ? 'rounded-[14px]' : 'rounded-[20px] shadow-2xl'
       }`}
       style={{
         backgroundColor: '#e6f3eb',
       }}
     >
-      {/* Pristine Blank Template Asset Provided by User */}
+      {/* Latest Updated Template Asset Provided by User */}
       <img
-        src="/assets/aistudio/image_2fe8e2c0.png"
-        alt="Invitation Card Blank Template"
+        src="/assets/aistudio/current_template.jpeg"
+        alt="Invitation Card Template"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         crossOrigin="anonymous"
       />
@@ -72,133 +72,81 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
         />
       )}
 
-      {/* Optional Custom Banner Header Overlay (only if user toggles custom banner) */}
-      {config.useCustomBanner && (
-        <div
-          className="absolute z-20 pointer-events-none flex flex-col items-center justify-center text-center px-4"
-          style={{
-            top: '8.8%',
-            left: '4%',
-            width: '92%',
-            height: '17%',
-            background:
-              'radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(240,249,244,0.96) 70%, rgba(230,245,236,0.92) 100%)',
-            borderRadius: '20px',
-            boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
-            border: '2px solid rgba(13, 99, 61, 0.3)',
-          }}
-        >
-          {/* Arc Top Title */}
-          <div className="w-full text-center">
-            <span
-              className="font-bold tracking-tight text-[#0f3b7d] inline-block"
-              style={{
-                fontSize: 'clamp(11px, 2.3cqi, 18px)',
-                letterSpacing: '0.02em',
-                textShadow: '0 1px 2px rgba(255,255,255,0.8)',
-              }}
-            >
-              {config.headerArcTitle}
-            </span>
-          </div>
-
-          {/* Main Title Styled */}
-          <div className="my-0.5">
-            <span
-              className="font-galada font-bold inline-block text-[#0a5c36]"
-              style={{
-                fontSize: 'clamp(24px, 5.8cqi, 46px)',
-                lineHeight: 1.1,
-                filter:
-                  'drop-shadow(1px 2px 0px #fff) drop-shadow(2px 3px 0px rgba(13, 99, 61, 0.4))',
-              }}
-            >
-              {config.mainTitle}
-            </span>
-          </div>
-
-          {/* Slogans */}
-          <div className="flex flex-col items-center text-[#9f1239] font-bold leading-tight">
-            <span
-              style={{
-                fontSize: 'clamp(8px, 1.6cqi, 13px)',
-              }}
-            >
-              {config.slogan1}
-            </span>
-            <span
-              style={{
-                fontSize: 'clamp(9px, 1.8cqi, 14px)',
-              }}
-            >
-              {config.slogan2}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Attendee Profile Photo Area (Circle in Upper Left) */}
-      <div
-        className="absolute z-20 group"
-        style={{
-          left: '2.8%',
-          top: '20.4%',
-          width: '35.0%',
-          aspectRatio: '1 / 1',
-        }}
-      >
-        <div className="relative w-full h-full rounded-full overflow-hidden shadow-sm flex items-center justify-center">
-          {attendee.photoUrl ? (
-            <img
-              src={attendee.photoUrl}
-              alt={attendee.name}
-              className="w-full h-full object-cover"
-              crossOrigin="anonymous"
-            />
-          ) : (
-            // Default placeholder avatar if no custom photo uploaded yet
-            <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-100/40 text-emerald-800">
-              <UserIcon className="w-[48%] h-[48%] text-emerald-700/60" />
-            </div>
-          )}
+      {(() => {
+        const photoScale = (config.photoScale || 98) / 100;
+        // In 1038x1515 template, circle diameter is 316px (30.44% of card width)
+        const photoWidthPercent = 30.44 * photoScale;
+        // Circle center: X = 18.30%, Y = 31.95%
+        const photoLeftPercent = 18.30 - photoWidthPercent / 2;
+        // Height in % of card height = width% * (1038 / 1515)
+        const photoHeightPercent = photoWidthPercent * (1038 / 1515);
+        const photoTopPercent = 31.95 - photoHeightPercent / 2 + (config.photoOffsetY || 0);
 
-          {/* Hover to upload photo in preview mode */}
-          {!isPrintMode && (
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white p-1"
-              title="ছবি পরিবর্তন করুন"
-            >
-              <Camera className="w-5 h-5 mb-1 text-emerald-300" />
-              <span className="text-[10px] font-bangla font-semibold text-center leading-tight">
-                ছবি পরিবর্তন
-              </span>
+        return (
+          <div
+            className="absolute z-20 group"
+            style={{
+              left: `${photoLeftPercent}%`,
+              top: `${photoTopPercent}%`,
+              width: `${photoWidthPercent}%`,
+              aspectRatio: '1 / 1',
+            }}
+          >
+            <div className="relative w-full h-full rounded-full overflow-hidden shadow-xs flex items-center justify-center bg-white">
+              {attendee.photoUrl ? (
+                <img
+                  src={attendee.photoUrl}
+                  alt={attendee.name}
+                  className="w-full h-full object-cover"
+                  crossOrigin="anonymous"
+                />
+              ) : (
+                // Default placeholder avatar if no custom photo uploaded yet
+                <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-50/60 text-emerald-800">
+                  <UserIcon className="w-[50%] h-[50%] text-emerald-700/60" />
+                </div>
+              )}
+
+              {/* Hover to upload photo in preview mode */}
+              {!isPrintMode && (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white p-1"
+                  title="ছবি পরিবর্তন করুন"
+                >
+                  <Camera className="w-5 h-5 mb-1 text-emerald-300" />
+                  <span className="text-[10px] font-bangla font-semibold text-center leading-tight">
+                    ছবি পরিবর্তন
+                  </span>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept="image/*"
-          className="hidden"
-        />
-      </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
+        );
+      })()}
 
       {/* Registration Number (Huge Bengali Digits inside the box) */}
       <div
         className="absolute z-20 flex items-center justify-center"
         style={{
-          left: '33.2%',
-          top: '34.0%',
-          width: '53.4%',
-          height: '10.8%',
+          left: '42.5%',
+          top: '37.16%',
+          width: '45.0%',
+          height: '7.79%',
         }}
       >
         <span
           className="font-anek font-bold text-[#09522e] tracking-wider text-center"
           style={{
-            fontSize: 'clamp(28px, 6.2cqi, 52px)',
+            fontSize: 'clamp(26px, 5.8cqi, 48px)',
             lineHeight: 1,
             textShadow: '0 1px 1px rgba(255,255,255,0.7)',
           }}
@@ -208,42 +156,42 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
       </div>
 
       {/* 5 Information Fields Text placed precisely into the blank boxes */}
-      {/* 1. Name (নামঃ) */}
+      {/* 1. Name */}
       <FieldTextRow
-        top="46.7%"
-        height="6.3%"
+        top="46.20%"
+        height="6.47%"
         label={config.labelName}
         value={attendee.name}
       />
 
-      {/* 2. School (স্কুলঃ) */}
+      {/* 2. School */}
       <FieldTextRow
-        top="54.4%"
-        height="6.5%"
+        top="54.06%"
+        height="6.73%"
         label={config.labelSchool}
         value={attendee.school}
       />
 
-      {/* 3. District / Location (জেলা অবস্থানঃ) */}
+      {/* 3. District / Location */}
       <FieldTextRow
-        top="62.9%"
-        height="6.4%"
+        top="62.18%"
+        height="6.67%"
         label={config.labelDistrict}
         value={attendee.district}
       />
 
-      {/* 4. Guests (অতিথিঃ) */}
+      {/* 4. Guests */}
       <FieldTextRow
-        top="70.9%"
-        height="6.5%"
+        top="70.03%"
+        height="6.60%"
         label={config.labelGuests}
         value={attendee.guests}
       />
 
-      {/* 5. Mobile (মোবাইল নম্বরঃ) */}
+      {/* 5. Mobile */}
       <FieldTextRow
-        top="78.7%"
-        height="6.3%"
+        top="77.82%"
+        height="6.67%"
         label={config.labelPhone}
         value={attendee.phone}
       />
@@ -306,8 +254,8 @@ const FieldTextRow: React.FC<FieldTextRowProps> = ({ top, height, label, value }
     <div
       className="absolute z-20 flex items-center px-2 min-w-0"
       style={{
-        left: '32.8%',
-        width: '53.8%',
+        left: '32.5%',
+        width: '54.5%',
         top,
         height,
       }}
@@ -318,7 +266,9 @@ const FieldTextRow: React.FC<FieldTextRowProps> = ({ top, height, label, value }
           fontSize: 'clamp(11px, 2.3cqi, 18px)',
         }}
       >
-        <span className="text-[#063b20] mr-1">{label}</span>
+        {label && label.trim() !== '' ? (
+          <span className="text-[#063b20] mr-1">{label}</span>
+        ) : null}
         <span className="text-[#0a1826]">{value}</span>
       </span>
     </div>

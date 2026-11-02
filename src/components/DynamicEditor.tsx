@@ -164,6 +164,29 @@ export const DynamicEditor: React.FC<DynamicEditorProps> = ({
               </div>
             </div>
 
+            {/* Photo Size Slider Control */}
+            <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800 space-y-1.5">
+              <div className="flex items-center justify-between text-slate-300 font-semibold">
+                <span>ছবির সাইজ (আকার নিয়ন্ত্রণ)</span>
+                <span className="font-mono text-emerald-400 font-bold">{config.photoScale || 88}%</span>
+              </div>
+              <input
+                type="range"
+                min="70"
+                max="100"
+                value={config.photoScale || 88}
+                onChange={(e) =>
+                  onUpdateConfig({ ...config, photoScale: Number(e.target.value) })
+                }
+                className="w-full accent-emerald-500 cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-slate-400">
+                <span>ছোট (৭০%)</span>
+                <span className="text-emerald-400 font-medium">আদর্শ সাইজ (৮৮%)</span>
+                <span>বড় (১০০%)</span>
+              </div>
+            </div>
+
             {/* Registration No & Name */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -265,104 +288,27 @@ export const DynamicEditor: React.FC<DynamicEditorProps> = ({
           </div>
         )}
 
-        {/* Tab 2: Event & Banner Configuration */}
+        {/* Tab 2: Event Details (Date & Venue) */}
         {activeTab === 'event' && (
           <div className="space-y-4">
-            <div className="border-b border-slate-800 pb-2">
-              <h4 className="font-bold text-sm text-white">ইভেন্টের শিরোনাম ও স্থান/তারিখ</h4>
-              <p className="text-slate-400 text-[11px]">ইভেন্টের সাধারণ তথ্য যা সকল কার্ডেই প্রযোজ্য হবে</p>
+            <div className="border-b border-slate-800 pb-2 flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-sm text-white">ইভেন্টের তারিখ ও স্থান</h4>
+                <p className="text-slate-400 text-[11px]">কার্ডের নিচের অংশে প্রদর্শিত তারিখ ও স্থান</p>
+              </div>
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+                মূল ব্যানার সক্রিয়
+              </span>
             </div>
 
-            {/* Toggle Banner Style */}
-            <div className="p-3 bg-slate-950/70 border border-slate-800 rounded-xl space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-slate-200">কাস্টম টেক্সট ব্যানার মোড</span>
-                  <p className="text-[11px] text-slate-400">
-                    {config.useCustomBanner
-                      ? 'কাস্টম টেক্সট টাইটেল সক্রিয় (নতুন নাম লিখতে পারবেন)'
-                      : 'ছবিতে থাকা মূল দৃষ্টিনন্দন গ্রাফিক্স ব্যানার সক্রিয়'}
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={config.useCustomBanner}
-                    onChange={(e) =>
-                      onUpdateConfig({ ...config, useCustomBanner: e.target.checked })
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
-                </label>
-              </div>
+            <div className="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl text-xs text-emerald-300 space-y-1">
+              <p className="font-bold">✓ মূল গ্রাফিক্স ব্যানার সংরক্ষিত:</p>
+              <p className="text-slate-300">
+                শীর্ষ ব্যানার ("এসএসসি ৮৮ ব্যাচের বন্ধুদের মিলনমেলা", "বাহের ডাক", "স্মৃতির আলোঃ...") আপনার দেওয়া মূল গ্রাফিক্স ডিজাইনে প্রদর্শিত হচ্ছে।
+              </p>
             </div>
 
-            {config.useCustomBanner && (
-              <div className="space-y-3 p-3 bg-slate-950/40 border border-emerald-500/20 rounded-xl">
-                <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
-                    শীর্ষ ব্যানার লেখা (কার্ভড)
-                  </label>
-                  <input
-                    type="text"
-                    value={config.headerArcTitle}
-                    onChange={(e) =>
-                      onUpdateConfig({ ...config, headerArcTitle: e.target.value })
-                    }
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-emerald-500 focus:outline-none"
-                    placeholder="এসএসসি ৮৮ ব্যাচের বন্ধুদের মিলনমেলা"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
-                    মূল ইভেন্টের নাম
-                  </label>
-                  <input
-                    type="text"
-                    value={config.mainTitle}
-                    onChange={(e) =>
-                      onUpdateConfig({ ...config, mainTitle: e.target.value })
-                    }
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-base focus:border-emerald-500 focus:outline-none"
-                    placeholder="বাহের ডাক"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
-                    স্লোগান (প্রথম লাইন)
-                  </label>
-                  <input
-                    type="text"
-                    value={config.slogan1}
-                    onChange={(e) =>
-                      onUpdateConfig({ ...config, slogan1: e.target.value })
-                    }
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-emerald-500 focus:outline-none"
-                    placeholder="স্মৃতির আলোঃ......বন্ধুত্বের উচ্ছ্বাসে......"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
-                    স্লোগান (দ্বিতীয় লাইন)
-                  </label>
-                  <input
-                    type="text"
-                    value={config.slogan2}
-                    onChange={(e) =>
-                      onUpdateConfig({ ...config, slogan2: e.target.value })
-                    }
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-emerald-500 focus:outline-none"
-                    placeholder="আমরা আবার এক সাথে"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Date & Venue */}
+            {/* Date & Venue Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div>
                 <label className="block text-slate-300 font-semibold mb-1 flex items-center gap-1.5">
