@@ -1,4 +1,4 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileSpreadsheet,
   Printer,
@@ -21,6 +21,7 @@ import { DynamicEditor } from './components/DynamicEditor';
 import { AttendeeTable } from './components/AttendeeTable';
 import { CsvUploaderModal } from './components/CsvUploaderModal';
 import { exportA4PagesToPdf, exportSingleCardImage } from './utils/pdfExport';
+import { preloadTemplateImage } from './utils/cardCanvasRenderer';
 
 export default function App() {
   const [attendees, setAttendees] = useState<Attendee[]>(INITIAL_ATTENDEES);
@@ -33,7 +34,16 @@ export default function App() {
 
   // PDF Export Progress State
   const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingPng, setIsExportingPng] = useState(false);
+  const [isPreparingPrint, setIsPreparingPrint] = useState(false);
   const [pdfProgress, setPdfProgress] = useState<{ current: number; total: number; stage: string } | null>(null);
+
+  // Preload template image immediately on startup
+  useEffect(() => {
+    preloadTemplateImage().catch((err) => {
+      console.warn('Preload template image failed:', err);
+    });
+  }, []);
 
   // A4 Preview Scale
   const [a4Scale, setA4Scale] = useState<number>(0.75);
@@ -194,12 +204,21 @@ export default function App() {
 
   // Direct PDF Download handler
   const handleDownloadPdf = async () => {
-    const pageIds = a4Pages.map((_, idx) => `a4-page-render-${idx}`);
     setIsExportingPdf(true);
+    setPdfProgress({
+      current: 1,
+      total: a4Pages.length,
+      stage: 'কার্ড ও ফন্ট প্রস্তুত হচ্ছে...',
+    });
     try {
-      await exportA4PagesToPdf(pageIds, (progress) => {
-        setPdfProgress(progress);
-      }, `invitation_cards_${attendees.length}_items.pdf`);
+      await exportA4PagesToPdf(
+        a4Pages,
+        config,
+        (progress) => {
+          setPdfProgress(progress);
+        },
+        `মিলনমেলা_কার্ড_${attendees.length}_জন.pdf`
+      );
     } catch (err) {
       console.error('PDF export error:', err);
     } finally {
@@ -209,13 +228,45 @@ export default function App() {
   };
 
   // Browser Direct Print Trigger
-  const handleBrowserPrint = () => {
-    window.print();
+  const handleBrowserPrint = async () => {
+    setIsPreparingPrint(true);
+    try {
+      if (document.fonts) {
+        await document.fonts.ready;
+      }
+      const printImages = Array.from(
+        document.querySelectorAll('.print-only img')
+      ) as HTMLImageElement[];
+      await Promise.all(
+        printImages.map((img) => {
+          if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+          return img.decode().catch(() => {});
+        })
+      );
+    } catch (err) {
+      console.warn('Print preload warning:', err);
+    } finally {
+      setIsPreparingPrint(false);
+      setTimeout(() => {
+        window.print();
+      }, 120);
+    }
   };
 
   // Single Card PNG Download
   const handleDownloadSinglePng = async () => {
-    await exportSingleCardImage('single-preview-card', `card_${currentAttendee.regNo}_${currentAttendee.name}.png`);
+    setIsExportingPng(true);
+    try {
+      await exportSingleCardImage(
+        currentAttendee,
+        config,
+        `card_${currentAttendee.regNo}_${currentAttendee.name}.png`
+      );
+    } catch (err) {
+      console.error('PNG export error:', err);
+    } finally {
+      setIsExportingPng(false);
+    }
   };
 
   return (
@@ -256,11 +307,18 @@ export default function App() {
 
             <button
               onClick={handleBrowserPrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold rounded-xl transition border border-slate-700"
+              disabled={isPreparingPrint}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs sm:text-sm font-semibold rounded-xl transition border border-slate-700 disabled:opacity-50"
               title="ব্রাউজার থেকে সরাসরি প্রিন্ট বা Save as PDF করুন"
             >
-              <Printer className="w-4 h-4 text-emerald-400" />
-              <span className="hidden md:inline">প্রিন্ট</span>
+              {isPreparingPrint ? (
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+              ) : (
+                <Printer className="w-4 h-4 text-emerald-400" />
+              )}
+              <span className="hidden md:inline">
+                {isPreparingPrint ? 'প্রস্তুত হচ্ছে...' : 'প্রিন্ট'}
+              </span>
             </button>
 
             <button
@@ -374,10 +432,15 @@ export default function App() {
               <div className="w-full max-w-md mt-4 flex items-center justify-between gap-2">
                 <button
                   onClick={handleDownloadSinglePng}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition shadow-sm"
+                  disabled={isExportingPng}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-semibold text-slate-200 hover:text-white transition shadow-sm disabled:opacity-50"
                 >
-                  <ImageIcon className="w-4 h-4 text-emerald-400" />
-                  <span>সিঙ্গেল PNG ডাউনলোড</span>
+                  {isExportingPng ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                  ) : (
+                    <ImageIcon className="w-4 h-4 text-emerald-400" />
+                  )}
+                  <span>{isExportingPng ? 'ডাউনলোড হচ্ছে...' : 'সিঙ্গেল PNG ডাউনলোড'}</span>
                 </button>
 
                 <button
@@ -445,18 +508,27 @@ export default function App() {
 
                 <button
                   onClick={handleBrowserPrint}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition border border-slate-700"
+                  disabled={isPreparingPrint}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold transition border border-slate-700 disabled:opacity-50"
                 >
-                  <Printer className="w-4 h-4 text-emerald-400" />
-                  <span>প্রিন্ট করুন</span>
+                  {isPreparingPrint ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                  ) : (
+                    <Printer className="w-4 h-4 text-emerald-400" />
+                  )}
+                  <span>{isPreparingPrint ? 'প্রস্তুত হচ্ছে...' : 'প্রিন্ট করুন'}</span>
                 </button>
 
                 <button
                   onClick={handleDownloadPdf}
                   disabled={isExportingPdf}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-emerald-950/60"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-emerald-950/60 disabled:opacity-50"
                 >
-                  <Download className="w-4 h-4" />
+                  {isExportingPdf ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
                   <span>সরাসরি PDF ডাউনলোড</span>
                 </button>
               </div>

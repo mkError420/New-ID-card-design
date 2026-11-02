@@ -40,7 +40,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
   return (
     <div
       id={cardId}
-      className={`relative w-full aspect-[1038/1515] overflow-hidden select-none font-bangla ${
+      className={`relative w-full aspect-[1038/1515] overflow-hidden select-none font-bangla @container [container-type:inline-size] ${
         isPrintMode ? 'rounded-[14px]' : 'rounded-[20px] shadow-2xl'
       }`}
       style={{
@@ -53,6 +53,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
         alt="Invitation Card Template"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         crossOrigin="anonymous"
+        loading="eager"
       />
 
       {/* Lanyard Hole Guide in Print Mode if enabled */}
@@ -93,17 +94,18 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
               aspectRatio: '1 / 1',
             }}
           >
-            <div className="relative w-full h-full rounded-full overflow-hidden shadow-xs flex items-center justify-center bg-white">
+            <div className="relative w-full h-full rounded-full overflow-hidden shadow-xs flex items-center justify-center bg-white border border-white/80">
               {attendee.photoUrl ? (
                 <img
                   src={attendee.photoUrl}
                   alt={attendee.name}
                   className="w-full h-full object-cover"
                   crossOrigin="anonymous"
+                  loading="eager"
                 />
               ) : (
                 // Default placeholder avatar if no custom photo uploaded yet
-                <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-50/60 text-emerald-800">
+                <div className="w-full h-full flex flex-col items-center justify-center bg-emerald-50 text-emerald-800">
                   <UserIcon className="w-[50%] h-[50%] text-emerald-700/60" />
                 </div>
               )}
@@ -144,9 +146,8 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
         }}
       >
         <span
-          className="font-anek font-bold text-[#09522e] tracking-wider text-center"
+          className="font-anek font-bold text-[#09522e] tracking-wider text-center text-[22px] sm:text-[32px] [font-size:clamp(20px,6.2cqi,46px)]"
           style={{
-            fontSize: 'clamp(26px, 5.8cqi, 48px)',
             lineHeight: 1,
             textShadow: '0 1px 1px rgba(255,255,255,0.7)',
           }}
@@ -214,8 +215,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
               <span className="text-[11px]">📅</span>
             </div>
             <span
-              className="font-bold text-[#09522e] truncate"
-              style={{ fontSize: 'clamp(9px, 1.9cqi, 15px)' }}
+              className="font-bold text-[#09522e] truncate text-[10px] sm:text-[13px] [font-size:clamp(9px,2.2cqi,15px)]"
             >
               {config.date}
             </span>
@@ -230,8 +230,7 @@ export const InvitationCard: React.FC<InvitationCardProps> = ({
               <span className="text-[11px]">📍</span>
             </div>
             <span
-              className="font-bold text-[#09522e] truncate"
-              style={{ fontSize: 'clamp(9px, 1.9cqi, 15px)' }}
+              className="font-bold text-[#09522e] truncate text-[10px] sm:text-[13px] [font-size:clamp(9px,2.2cqi,15px)]"
             >
               {config.venue}
             </span>
@@ -261,10 +260,7 @@ const FieldTextRow: React.FC<FieldTextRowProps> = ({ top, height, label, value }
       }}
     >
       <span
-        className="font-bangla font-bold text-[#0a2016] truncate block w-full leading-tight"
-        style={{
-          fontSize: 'clamp(11px, 2.3cqi, 18px)',
-        }}
+        className="font-bangla font-bold text-[#0a2016] truncate block w-full leading-tight text-[11px] sm:text-[14px] [font-size:clamp(10px,2.6cqi,18px)]"
       >
         {label && label.trim() !== '' ? (
           <span className="text-[#063b20] mr-1">{label}</span>
